@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# locally installed test tooling (not part of the deliverable)
+.tools/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# generated previews
+docs/screenshots/_uml/
