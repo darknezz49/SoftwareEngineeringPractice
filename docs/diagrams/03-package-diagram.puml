@@ -1,0 +1,99 @@
+@startuml PackageDiagram
+' ===========================================================================
+' POS System - Logical Architecture (UML Package Diagram)
+' Software Engineering Practice - Part 2, artifact 3
+'
+' Layers pattern: higher layers call down into lower layers; lower layers
+' never reference higher ones.  This rule is enforced by the code itself -
+' nothing in pos.domain imports anything from pos.application,
+' pos.presentation or pos.technical.
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 44
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #1F4E79
+  FontStyle bold
+  FontSize 14
+}
+skinparam arrow {
+  Color #1F4E79
+  FontSize 11
+}
+
+' ===========================================================================
+' LAYER 1 - Presentation
+' ===========================================================================
+package "«layer» Presentation" as P #DEEAF6 {
+  package "pos.presentation.gui" as P_gui #FFFFFF {
+    class POSWindow <<Tk window>>
+  }
+  package "pos.presentation.terminal" as P_term #FFFFFF {
+    class TerminalPOS
+  }
+  note bottom of P_gui
+    Two interchangeable views over the
+    same application layer.
+  end note
+}
+
+' ===========================================================================
+' LAYER 2 - Application
+' ===========================================================================
+package "«layer» Application" as A #DEEAF6 {
+  package "pos.application" as A_ctrl #FFFFFF {
+    class ProcessSaleController <<use case controller>>
+    class HandleReturnsController <<use case controller>>
+    class POSApplication <<composition root>>
+  }
+}
+
+' ===========================================================================
+' LAYER 3 - Domain
+' ===========================================================================
+package "«layer» Domain" as D #FDF3D8 {
+  package "pos.domain" as D_dom #FFFFFF {
+    class Register <<facade controller>>
+    class Sale
+    class ReturnTransaction
+    class ProductCatalog
+    class InventoryService
+    class PaymentFactory <<Factory>>
+  }
+}
+
+' ===========================================================================
+' LAYER 4 - Technical Services
+' ===========================================================================
+package "«layer» Technical Services" as T #E4F2E4 {
+  package "pos.technical" as T_svc #FFFFFF {
+    interface PaymentGateway <<port>>
+    class LegacyTerminalAdapter <<Adapter>>
+    class SoapServiceAdapter <<Adapter>>
+    class PaymentGatewayFactory <<Factory>>
+    class SaleRepository
+    class AuditLog
+  }
+}
+
+' ===========================================================================
+' allowed dependencies: downward only
+' ===========================================================================
+P --> A : delegates system\noperations
+A --> D : coordinates\nuse cases
+A --> T : uses services
+D ..> T : depends on the\nPaymentGateway port
+
+note right of T
+  **Dependency rule**
+  Presentation -> Application -> Domain -> Technical Services
+  (domain depends only on the *interface* in Technical Services,
+  and the adapter is injected by the composition root, so the
+  dependency is inverted where it matters.)
+end note
+
+@enduml

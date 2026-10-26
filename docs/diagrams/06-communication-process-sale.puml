@@ -1,0 +1,82 @@
+@startuml Communication-ProcessSale
+' ===========================================================================
+' POS System - Communication Diagram: Process Sale use case realization
+' Software Engineering Practice - Part 2, artifact 4 (interaction diagrams)
+'
+' Shows the same interaction as the sequence diagram but in graph form, which
+' is the space-economical form recommended for wall sketching.
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 34
+skinparam ranksep 44
+skinparam object {
+  BackgroundColor #EAF2FB
+  BorderColor #1F4E79
+  ArrowColor #1F4E79
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #D6B656
+}
+
+' the actor, drawn as an object-shaped box so the messages read cleanly
+object ":Cashier" as Cashier
+
+object ":Register" as Register
+object "s : Sale" as Sale
+object "li : SalesLineItem" as LI
+object "c : ProductCatalog" as Catalog
+object "spec : ProductSpecification" as Spec
+object "i : InventoryService" as Inv
+object "p : Payment" as Payment
+object "f : PaymentFactory" as Factory
+
+' ---- makeNewSale ----------------------------------------------------------
+Cashier --> Register : 1: makeNewSale()
+Register --> Sale : 1.1: «create»
+
+' ---- enterItem ------------------------------------------------------------
+Cashier --> Register : 2: enterItem(itemID, qty)
+Register --> Catalog : 2.1: getSpecification(itemID)
+Catalog --> Spec : 2.1.1: [found]
+Register --> LI : 2.2: «create»(spec, qty)
+Register --> Sale : 2.3: makeLineItem(spec, qty)
+Sale --> LI : 2.3.1: add(self)  ' GRASP Creator: Sale aggregates its line items
+Register --> Inv : 2.4: isAvailable(itemID, qty)
+
+' ---- getTotal -------------------------------------------------------------
+Cashier --> Register : 3: getTotal()
+Register --> Sale : 3.1: getTotal()
+Sale --> LI : 3.1.1: getSubtotal()   ' loop for each line item
+LI --> Spec : 3.1.1.1: [price]
+
+' ---- makePayment ----------------------------------------------------------
+Cashier --> Register : 4: makePayment(kind)
+Register --> Factory : 4.1: create(kind, amount)
+Factory --> Payment : 4.1.1: «create»
+Register --> Sale : 4.2: makePayment(p)
+Sale --> Payment : 4.2.1: authorize()
+Register --> Inv : 4.3: remove(itemID, qty)   ' loop for each line item
+
+' ---- endSale --------------------------------------------------------------
+Cashier --> Register : 5: endSale()
+Register --> Sale : 5.1: getChange()
+Register --> Cashier : 5.2: receipt
+
+note bottom of Register
+  **GRASP decisions visible here**
+  -- *Controller*: :Register is the facade controller, the first object
+     beyond the UI layer to receive each system operation.
+  -- *Creator*: :Register creates :Sale (1.1) and :Sale creates
+     :SalesLineItem (2.2/2.3.1), because each records/aggregates the next.
+  -- *Information Expert*: :Sale.getTotal (3.1) and
+     :SalesLineItem.getSubtotal (3.1.1) are placed where the data is.
+  -- *Factory*: :PaymentFactory owns payment creation (4.1), keeping
+     that responsibility out of the domain.
+  -- *Low Coupling*: :Register talks to :ProductCatalog through one
+     lookup message and never reaches into a specification's internals.
+end note
+
+@enduml

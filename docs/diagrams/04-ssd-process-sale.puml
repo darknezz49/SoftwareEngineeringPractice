@@ -1,0 +1,64 @@
+@startuml SSD-ProcessSale
+' ===========================================================================
+' POS System - System Sequence Diagram: Process Sale (main success scenario)
+' Software Engineering Practice - Part 2, artifact 1 (third element)
+'
+' The :System under design: is a BLACK BOX - only events crossing the system
+' boundary are shown, never internal objects.
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+skinparam sequence {
+  ArrowColor #1F4E79
+  ActorBorderColor #1F4E79
+  ActorBackgroundColor #DEEAF6
+  LifeLineBorderColor #1F4E79
+  ParticipantBorderColor #1F4E79
+  ParticipantBackgroundColor #DEEAF6
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #D6B656
+}
+
+actor "Cashier" as Cashier
+participant ":System" as System
+
+activate System
+
+Cashier -> System : makeNewSale()
+activate System
+System --> Cashier : «create» a sale
+
+Cashier -> System : enterItem(itemID, quantity)
+System --> Cashier : description, total
+
+Cashier -> System : enterItem(itemID, quantity)
+System --> Cashier : description, total
+
+Cashier -> System : removeItem(itemID)   ' optional, loop [more items]
+
+Cashier -> System : getTotal()
+System --> Cashier : total
+
+Cashier -> System : makePayment(cashTendered)
+System --> Cashier : change due
+
+Cashier -> System : endSale()
+System --> Cashier : receipt
+
+deactivate System
+deactivate System
+
+note right of System
+  **System events** (messages from an actor to the system):
+  makeNewSale, enterItem, removeItem, getTotal,
+  makePayment, endSale.
+
+  Each becomes a **system operation** on the facade controller
+  (Register) during object design - see the OO design diagrams.
+end note
+
+@enduml

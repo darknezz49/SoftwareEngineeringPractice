@@ -1,0 +1,161 @@
+@startuml DomainModel
+' ===========================================================================
+' POS System - Domain Model (conceptual classes, NO operations)
+' Software Engineering Practice - Part 2, artifact 2  (= OOA)
+'
+' Conceptual perspective only: these are real-world things in the shop,
+' not software objects.  No method signatures appear, by definition of a
+' Domain Model (see Applying UML and Patterns, section 9.2).
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam nodesep 26
+skinparam ranksep 36
+skinparam class {
+  BackgroundColor #FDFDF5
+  BorderColor #7F6000
+  ArrowColor #7F6000
+  FontStyle bold
+  FontSize 13
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #D6B656
+  FontSize 11
+}
+
+' ---------- the store, its terminals and the people -------------------------
+class Store {
+  storeId
+  name
+  address
+}
+
+class Register {
+  registerId
+}
+
+class "Cashier\n(role of person)" as Cashier {
+  cashierId
+  name
+}
+
+class "Customer\n(role of person)" as Customer {
+  customerId
+  name
+}
+
+' ---------- the transactions: business transactions come first --------------
+class Sale {
+  dateTime
+  isComplete
+}
+
+class ReturnTransaction {
+  dateTime
+  reason
+  refundTotal
+}
+
+' ---------- transaction line items ------------------------------------------
+class SalesLineItem {
+  quantity
+}
+
+class ReturnLineItem {
+  quantity
+  resellable
+}
+
+' ---------- products: description first, then catalogue ---------------------
+class "ProductSpecification\n(description)" as ProductSpecification {
+  itemID
+  description
+  price
+  taxRate
+}
+
+class ProductCatalog
+
+class Item {
+  serialNumber
+}
+
+' ---------- payments ---------------------------------------------------------
+abstract class Payment {
+  amount
+  dateTime
+}
+
+class CashPayment {
+  amountTendered
+  changeDue
+}
+
+class CreditPayment {
+  cardNumber
+  authorizationCode
+}
+
+' ---------- the report of a sale --------------------------------------------
+class Receipt {
+  receiptId
+  dateTime
+  total
+}
+
+' ===========================================================================
+' associations
+' ===========================================================================
+Store "1" -- "1..*" Register : houses >
+Register "1" -- "0..1" Sale : records >
+Register "1" -- "1" ProductCatalog : uses >
+
+Cashier "1" -- "0..*" Sale : is operated by >
+Customer "0..1" -- "0..*" Sale : buys >
+Customer "0..1" -- "0..*" ReturnTransaction : returns >
+
+' composition: a line item cannot outlive its transaction (Creator, too)
+Sale "1" *-- "1..*" SalesLineItem : contains >
+ReturnTransaction "1" *-- "1..*" ReturnLineItem : contains >
+
+SalesLineItem "0..*" -- "1" ProductSpecification : describes >
+ReturnLineItem "0..*" -- "1" ProductSpecification : describes >
+
+ProductSpecification "1" -- "0..*" Item : describes >
+ProductCatalog "1" -- "0..*" ProductSpecification : contains >
+
+' a sale may be paid by more than one payment (part cash, part card)
+Sale "1" -- "1..*" Payment : is paid by >
+ReturnTransaction "1" -- "0..1" Payment : is reimbursed by >
+
+Payment <|-- CashPayment
+Payment <|-- CreditPayment
+
+Sale "1" -- "0..1" Receipt : is recorded on >
+ReturnTransaction "0..*" -- "0..1" Sale : reverses >
+
+note right of ProductSpecification
+  **Description class** (Item-Descriptor pattern).
+  Records price/description of a *kind* of product,
+  independent of whether any Item currently exists,
+  so the price survives the stock selling out.
+  See Applying UML and Patterns, section 9.13.
+end note
+
+note bottom of ReturnLineItem
+  **resellable** is a real domain notion, not a
+  software flag: damaged goods are not put back
+  on the shelf, so the stock-on-hand the shop
+  needs differs from the quantity refunded.
+end note
+
+note left of Payment
+  Polymorphic payment.  CashPayment and
+  CreditPayment settle differently, but a Sale
+  only needs to know it has a Payment.
+end note
+
+@enduml

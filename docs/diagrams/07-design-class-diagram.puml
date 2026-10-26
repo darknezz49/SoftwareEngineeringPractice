@@ -1,0 +1,262 @@
+@startuml DCD
+' ===========================================================================
+' POS System - Design Class Diagram (DCD)
+' Software Engineering Practice - Part 2, artifact 4 (class diagram)
+'
+' This is the SOFTWARE view, unlike the domain model: it shows the actual
+' classes, their attributes with types and visibility, and their operations.
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+skinparam nodesep 24
+skinparam ranksep 40
+skinparam class {
+  BackgroundColor #EAF2FB
+  BorderColor #1F4E79
+  ArrowColor #1F4E79
+  FontSize 12
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #D6B656
+  FontSize 10
+}
+
+package "presentation" #DEEAF6 {
+  class POSWindow <<Tk window>> {
+    - app : POSApplication
+    + demo_process_sale()
+    + demo_handle_returns()
+    + run()
+  }
+  class TerminalPOS {
+    - app : POSApplication
+    - inputs : Iterable
+    + run()
+  }
+}
+
+package "application" #DEEAF6 {
+  class ProcessSaleController <<use case controller>> {
+    - register : Register
+    - sales : SaleRepository
+    - audit : AuditLog
+    + make_new_sale() : str
+    + enter_item(id, qty) : LineItemView
+    + remove_item(id)
+    + get_total() : Money
+    + make_payment(kind, **opts) : SaleResult
+    + end_sale() : Receipt
+    + cancel_transaction()
+  }
+  class HandleReturnsController <<use case controller>> {
+    - register : Register
+    - sales : SaleRepository
+    - returns : ReturnRepository
+    + make_new_return(saleId, reason) : str
+    + enter_return_item(id, qty, resellable) : LineItemView
+    + get_refund_total() : Money
+    + authorize_refund(method) : Money
+    + end_return() : RefundResult
+  }
+  class POSApplication <<composition root>> {
+    + register : Register
+    + process_sale : ProcessSaleController
+    + handle_returns : HandleReturnsController
+  }
+  class SaleResult <<view object>> {
+    + sale_id : str
+    + total : str
+    + change : str
+    + receipt_text : str
+  }
+}
+
+package "domain" #FDF3D8 {
+  class Register <<facade controller>> {
+    - id : String
+    - currentSale : Sale
+    - currentReturn : ReturnTransaction
+    + make_new_sale(when) : Sale
+    + enter_item(id, qty) : SalesLineItem
+    + remove_item(id) : bool
+    + get_total() : Money
+    + make_payment(kind, **opts) : Payment
+    + end_sale() : Receipt
+    + make_new_return(sale, reason, when) : ReturnTransaction
+    + enter_return_item(id, qty, resellable) : ReturnLineItem
+    + authorize_refund(method) : Money
+  }
+
+  class Sale {
+    - id : String
+    - time : DateTime
+    - state : SaleState
+    - lineItems : List<SalesLineItem>
+    - payments : List<Payment>
+    + make_line_item(spec, qty) : SalesLineItem
+    + remove_line_item(id) : bool
+    + get_total() : Money
+    + make_payment(p : Payment) : Payment
+    + get_change_due() : Money
+    + item_count() : int
+  }
+
+  class SalesLineItem {
+    - quantity : int
+    + get_subtotal() : Money
+    + increase_quantity(delta)
+  }
+
+  class ReturnTransaction {
+    - id : String
+    - reason : String
+    - lineItems : List<ReturnLineItem>
+    + make_line_item(spec, qty, resellable) : ReturnLineItem
+    + get_refund_total() : Money
+    + authorize_refund(method) : Money
+    + resellable_lines() : List
+  }
+
+  class ReturnLineItem {
+    - quantity : int
+    - resellable : bool
+    + get_subtotal() : Money
+  }
+
+  class ProductCatalog {
+    - specifications : Map<ItemID, ProductSpecification>
+    + get_specification(id) : ProductSpecification
+    + add_specification(spec)
+  }
+
+  class ProductSpecification {
+    - itemID : ItemID
+    - description : String
+    - price : Money
+    - taxRate : String
+  }
+
+  class InventoryService {
+    - levels : Map<ItemID, int>
+    + get_level(id) : int
+    + is_available(id, qty) : bool
+    + remove(id, qty) : int
+    + restock(id, qty) : int
+  }
+
+  abstract class Payment {
+    # amount : Money
+    # authorized : bool
+    # reference : String
+    + authorize() : bool
+  }
+
+  class CashPayment {
+    - tendered : Money
+    - change : Money
+    + authorize() : bool
+  }
+
+  class CreditPayment {
+    - cardNumber : String
+    - gateway : PaymentGateway
+    + authorize() : bool
+  }
+
+  class PaymentFactory <<Factory>> {
+    - creditGateway : PaymentGateway
+    + create(kind, amount, **kw) : Payment
+  }
+
+  class Money <<value object>> {
+    - amount : Decimal
+    + get_total() : Money
+    + __add__ / __sub__ / __mul__
+  }
+}
+
+package "technical" #E4F2E4 {
+  interface PaymentGateway <<port>> {
+    + authorize(cardNumber, amount) : AuthorizationResult
+  }
+  class LegacyTerminalAdapter <<Adapter>> {
+    - terminal : ExternalPaymentTerminal
+    + authorize(cardNumber, amount) : AuthorizationResult
+  }
+  class SoapServiceAdapter <<Adapter>> {
+    - service : SoapAuthorizationService
+    + authorize(cardNumber, amount) : AuthorizationResult
+  }
+  class PaymentGatewayFactory <<Factory>> {
+    + create(kind, **opts) : PaymentGateway
+  }
+  class SaleRepository {
+    - sales : Map<String, Sale>
+    + add(sale)
+    + get(id) : Sale
+    + find_by_item(id) : List<Sale>
+  }
+  class Receipt <<report object>> {
+    + to_text() : String
+  }
+  class AuditLog {
+    + record(operation, detail, outcome)
+    + recent(n) : List<AuditEntry>
+  }
+}
+
+' ---- presentation -> application -------------------------------------------
+POSWindow --> POSApplication
+TerminalPOS --> POSApplication
+POSApplication --> ProcessSaleController
+POSApplication --> HandleReturnsController
+
+' ---- application -> domain -------------------------------------------------
+ProcessSaleController --> Register
+ProcessSaleController --> SaleResult
+HandleReturnsController --> Register
+
+' ---- domain internal --------------------------------------------------------
+Register "1" o-- "0..1" Sale : currentSale >
+Register "1" o-- "0..1" ReturnTransaction : currentReturn >
+Register --> ProductCatalog
+Register --> InventoryService
+Sale "1" *-- "1..*" SalesLineItem
+ReturnTransaction "1" *-- "1..*" ReturnLineItem
+Sale "1" --> "1..*" Payment
+SalesLineItem --> ProductSpecification
+ReturnLineItem --> ProductSpecification
+ProductCatalog "1" o-- "0..*" ProductSpecification
+Sale --> Money
+SalesLineItem --> Money
+
+' ---- domain -> technical ---------------------------------------------------
+PaymentFactory ..> PaymentGateway : uses
+PaymentFactory ..> Payment : «create»
+CreditPayment --> PaymentGateway : delegates auth to
+PaymentGatewayFactory ..> PaymentGateway : «create»
+PaymentGateway <|.. LegacyTerminalAdapter
+PaymentGateway <|.. SoapServiceAdapter
+LegacyTerminalAdapter --> ExternalPaymentTerminal : adapts
+SoapServiceAdapter --> SoapAuthorizationService : adapts
+SaleRepository o-- Sale
+ProcessSaleController --> SaleRepository
+ProcessSaleController --> AuditLog
+HandleReturnsController --> SaleRepository
+
+note right of PaymentFactory
+  **Factory**: owns payment creation so the
+  domain does not decide concrete classes.
+end note
+
+note bottom of LegacyTerminalAdapter
+  **Adapter**: converts a foreign, stateful, cents-based
+  terminal interface into our PaymentGateway port.
+  SoapServiceAdapter does the same for a service that
+  reports failures by throwing.
+end note
+
+@enduml

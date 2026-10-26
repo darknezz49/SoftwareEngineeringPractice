@@ -1,0 +1,70 @@
+@startuml SSD-HandleReturns
+' ===========================================================================
+' POS System - System Sequence Diagram: Handle Returns (main success scenario)
+' Software Engineering Practice - Part 2, artifact 1 (third element)
+'
+' Modelled by analogy with Process Sale ("比着葫芦画瓢"): the same shape of
+' transaction, with the events that the Handle Returns use case text implies.
+' ===========================================================================
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+skinparam sequence {
+  ArrowColor #1F4E79
+  ActorBorderColor #1F4E79
+  ActorBackgroundColor #DEEAF6
+  LifeLineBorderColor #1F4E79
+  ParticipantBorderColor #1F4E79
+  ParticipantBackgroundColor #DEEAF6
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #D6B656
+}
+
+actor "Cashier" as Cashier
+participant ":System" as System
+
+activate System
+
+Cashier -> System : makeNewReturn(originalSaleID)
+activate System
+System --> Cashier : «create» a return
+
+Cashier -> System : enterReturnItem(itemID, quantity, resellable)
+System --> Cashier : description, refund amount
+
+Cashier -> System : enterReturnItem(itemID, quantity, resellable)
+System --> Cashier : description, refund amount
+
+Cashier -> System : getRefundTotal()
+System --> Cashier : refund total
+
+Cashier -> System : authorizeRefund(method)
+System --> Cashier : refund authorised
+
+Cashier -> System : endReturn()
+System --> Cashier : refund receipt
+
+deactivate System
+deactivate System
+
+note right of System
+  **System events**: makeNewReturn, enterReturnItem,
+  getRefundTotal, authorizeRefund, endReturn.
+
+  Events 2-4 may repeat for each returned item.
+end note
+
+
+' ---------------------------------------------------------------------------
+' Alternate scenarios (documented in full in the fully dressed use case text,
+' not on this SSD, which shows the main success scenario only):
+'
+'   3a. The item id is not found on the original sale.
+'   3b. The returned quantity exceeds the quantity sold on that receipt.
+'   5a. The card refund is rejected by the issuer -> reimburse in cash instead.
+'   1a. No receipt is available -> return without a link to the original sale.
+' ---------------------------------------------------------------------------
+@enduml

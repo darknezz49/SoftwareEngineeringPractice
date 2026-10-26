@@ -1,0 +1,71 @@
+@startuml UseCaseDiagram
+' ===========================================================================
+' POS System - Use Case Diagram
+' Software Engineering Practice - Part 2, artifact 1
+' ===========================================================================
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam nodesep 22
+skinparam ranksep 40
+skinparam usecase {
+  BackgroundColor #EAF2FB
+  BorderColor #1F4E79
+  ArrowColor #1F4E79
+  FontSize 12
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #1F4E79
+}
+skinparam rectangle {
+  BackgroundColor #FBFCFD
+  BorderColor #1F4E79
+}
+
+actor "Cashier" as Cashier
+actor "Customer" as Customer
+actor "Payment\nAuthorisation Service" as PaymentService <<external system>>
+actor "Inventory\nSystem" as Inventory <<external system>>
+
+rectangle "NextGen POS System" {
+  usecase "Log In" as UC_Login
+  usecase "Process Sale" as UC_ProcessSale
+  usecase "Handle Returns" as UC_HandleReturns
+  usecase "Make Payment" as UC_MakePayment
+  usecase "Update Inventory" as UC_UpdateInventory
+  usecase "Print Receipt" as UC_PrintReceipt
+  usecase "View Store Status" as UC_ViewStatus
+  usecase "Look Up Original Sale" as UC_LookupSale
+
+  ' ---- include: sub-behaviour that always runs ---------------------------
+  UC_ProcessSale ..> UC_MakePayment : <<include>>
+  UC_ProcessSale ..> UC_UpdateInventory : <<include>>
+  UC_ProcessSale ..> UC_PrintReceipt : <<include>>
+  UC_HandleReturns ..> UC_LookupSale : <<include>>
+  UC_HandleReturns ..> UC_UpdateInventory : <<include>>
+  UC_HandleReturns ..> UC_PrintReceipt : <<include>>
+
+  ' ---- extend: optional / exceptional behaviour --------------------------
+  usecase "Manual Item Entry" as UC_ManualEntry
+  usecase "Reject Credit Card" as UC_RejectCard
+  UC_ManualEntry .> UC_ProcessSale : <<extend>>
+  UC_RejectCard .> UC_MakePayment : <<extend>>
+}
+
+' ---- primary actors --------------------------------------------------------
+Cashier --> UC_Login
+Cashier --> UC_ProcessSale
+Cashier --> UC_HandleReturns
+Cashier --> UC_ViewStatus
+Customer --> UC_ProcessSale
+Customer --> UC_HandleReturns
+
+' ---- supporting external systems -------------------------------------------
+UC_MakePayment --> PaymentService
+UC_LookupSale --> Inventory
+UC_UpdateInventory --> Inventory
+
+@enduml
