@@ -7,9 +7,11 @@
 * main
 ```
 
-# Commit history (24 commits)
+# Commit history (26 commits)
 
 ```
+2026-10-28  da27eba  darknezz49  docs: add real screenshots of the graphical interface to the report
+2026-10-28  bada1ee  darknezz49  docs: refresh the embedded Git history after the previous commit
 2026-10-28  c1f0781  darknezz49  docs: refresh the Git evidence and add a submission-time refresh script
 2026-10-27  95228e6  darknezz49  docs(agile): sprint working notes and requirement traceability
 2026-10-27  c36b49d  darknezz49  docs: record the generated Git command history in GIT_WORKFLOW.md
@@ -39,6 +41,23 @@
 # Per-commit file statistics
 
 ```
+da27eba docs: add real screenshots of the graphical interface to the report
+ README.md                                  |  20 +++++++---
+ docs/ARCHITECTURE.md                       |   8 ++--
+ docs/capture_screenshots.py                |  59 +++++++++++++++++++++++------
+ docs/make_agile_workbook.py                |   8 ++--
+ docs/screenshots/01-process-sale.png       | Bin 0 -> 338782 bytes
+ docs/screenshots/02-sales-receipt.png      | Bin 0 -> 288603 bytes
+ docs/screenshots/03-store-status.png       | Bin 0 -> 229943 bytes
+ docs/screenshots/04-handle-returns.png     | Bin 0 -> 282151 bytes
+ docs/screenshots/05-refund-receipt.png     | Bin 0 -> 289802 bytes
+ docs/screenshots/06-store-status-final.png | Bin 0 -> 291818 bytes
+ docs/screenshots/07-credit-entry.png       | Bin 0 -> 317753 bytes
+ 11 files changed, 72 insertions(+), 23 deletions(-)
+bada1ee docs: refresh the embedded Git history after the previous commit
+ docs/GIT_EVIDENCE.md | 8 +++++++-
+ docs/GIT_WORKFLOW.md | 6 ++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
 c1f0781 docs: refresh the Git evidence and add a submission-time refresh script
  docs/GIT_EVIDENCE.md         | 145 +++++++++++++++++++++++++++++++++++++++++++
  docs/GIT_WORKFLOW.md         |   8 +++
