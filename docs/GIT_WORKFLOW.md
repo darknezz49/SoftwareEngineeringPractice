@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | Project name | `ProjectPos_2026` |
+| Remote repository | https://github.com/darknezz49/SoftwareEngineeringPractice |
 | Default branch | `main` |
 | Maintainer | the repository owner, who merges pull requests into `main` |
 | Collaborators | every team member, each working on their own branch |
@@ -38,7 +39,7 @@ Conventions:
 # 1. create the project and the repository
 mkdir ProjectPos_2026 && cd ProjectPos_2026
 git init -b main
-git remote add origin https://github.com/<owner>/ProjectPos_2026.git
+git remote add origin https://github.com/darknezz49/SoftwareEngineeringPractice.git
 
 # 2. create the member branch that all the work goes on
 git checkout -b feature/solo-development

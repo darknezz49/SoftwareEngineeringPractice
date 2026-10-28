@@ -1,5 +1,7 @@
 # ProjectPos_2026 - NextGen POS
 
+Repository: <https://github.com/darknezz49/SoftwareEngineeringPractice>
+
 A point-of-sale system for a small supermarket, built with object-oriented
 analysis and design techniques as required by the *Software Engineering
 Practice* assignment (PoS System Using Agile).
