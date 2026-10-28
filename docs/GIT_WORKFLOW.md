@@ -67,6 +67,8 @@ Produced by `git log --date=short --pretty="%ad  %h  %s"`:
 
 <!-- GITLOG-START -->
 ```
+2026-10-27  95228e6  darknezz49  docs(agile): sprint working notes and requirement traceability
+2026-10-27  c36b49d  darknezz49  docs: record the generated Git command history in GIT_WORKFLOW.md
 2026-10-26  7680c3b  darknezz49  docs: architecture notes, user manual and git workflow
 2026-10-27  ec56b63  darknezz49  docs: sprint review notes and the history rebuild script
 2026-10-27  3a0925d  darknezz49  build: scripts that regenerate the figures and the Agile workbook
@@ -95,6 +97,12 @@ Produced by `git log --stat --oneline` for the file-level detail:
 
 <!-- GITSTAT-START -->
 ```
+95228e6 docs(agile): sprint working notes and requirement traceability
+ docs/agile/README.md | 100 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 100 insertions(+)
+c36b49d docs: record the generated Git command history in GIT_WORKFLOW.md
+ docs/GIT_WORKFLOW.md | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 123 insertions(+), 2 deletions(-)
 7680c3b docs: architecture notes, user manual and git workflow
  docs/ARCHITECTURE.md | 188 +++++++++++++++++++++++++++++++++++++++++++++++++++
  docs/GIT_WORKFLOW.md |  97 ++++++++++++++++++++++++++
