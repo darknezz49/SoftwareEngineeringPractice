@@ -68,6 +68,8 @@ Produced by `git log --date=short --pretty="%ad  %h  %s"`:
 
 <!-- GITLOG-START -->
 ```
+2026-10-28  1c73e7d  darknezz49  docs: record the GitHub remote and the branch layout
+2026-10-28  700abef  darknezz49  docs: regenerate the Git evidence after adding the screenshots
 2026-10-28  da27eba  darknezz49  docs: add real screenshots of the graphical interface to the report
 2026-10-28  bada1ee  darknezz49  docs: refresh the embedded Git history after the previous commit
 2026-10-28  c1f0781  darknezz49  docs: refresh the Git evidence and add a submission-time refresh script
@@ -101,6 +103,14 @@ Produced by `git log --stat --oneline` for the file-level detail:
 
 <!-- GITSTAT-START -->
 ```
+1c73e7d docs: record the GitHub remote and the branch layout
+ README.md            | 2 ++
+ docs/GIT_WORKFLOW.md | 3 ++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+700abef docs: regenerate the Git evidence after adding the screenshots
+ docs/GIT_EVIDENCE.md | 21 ++++++++++++++++++++-
+ docs/GIT_WORKFLOW.md | 19 +++++++++++++++++++
+ 2 files changed, 39 insertions(+), 1 deletion(-)
 da27eba docs: add real screenshots of the graphical interface to the report
  README.md                                  |  20 +++++++---
  docs/ARCHITECTURE.md                       |   8 ++--
