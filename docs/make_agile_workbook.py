@@ -556,9 +556,11 @@ RETRO = [
     "configuration, since the choice is a variation point.",
     "Sprint 5 - Kept: keeping the domain free of UI imports made a second, "
     "text-mode view possible with no domain change - direct evidence the "
-    "layers are real.  Changed: screenshot capture of the Tk window was not "
-    "possible in the build environment, so the report uses genuine "
-    "text-mode transcripts plus the rendered UML instead.",
+    "layers are real.  Changed: window screenshot capture initially failed "
+    "because the environment lacked macOS Screen Recording permission, so a "
+    "capture script plus text-mode transcripts were produced; once the "
+    "permission was granted the script captured the real window and those "
+    "screenshots replaced the transcripts in the report.",
 ]
 
 

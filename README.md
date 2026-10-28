@@ -118,10 +118,18 @@ Money("0.10") + Money("0.20") == Money("0.30")    # True, exactly
 * [docs/GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md) - branching model and commit history
 * [docs/diagrams/](docs/diagrams) - all UML models with their PlantUML sources
 
-## 8. Known limitation
+## 8. Screenshots and figures
 
-The Tk window itself could not be captured as a screenshot in the build
-environment (it has no macOS Screen Recording permission), so the report
-illustrates behaviour with **genuine text-mode transcripts** produced by
-running the real application (`docs/make_figures.py`) rather than fabricated
-mock-ups.
+Two independent sets of figures are generated from the real application, never
+drawn by hand:
+
+* `docs/capture_screenshots.py` drives the Tk window through scripted
+  scenarios and captures each frame with `screencapture` (macOS Screen
+  Recording permission required). These are the report's screenshots.
+* `docs/make_figures.py` drives the text-mode view and renders the transcripts.
+  These are the evidence that the same use cases run with no display.
+
+```bash
+python docs/capture_screenshots.py     # window screenshots
+python docs/make_figures.py            # terminal transcripts
+```

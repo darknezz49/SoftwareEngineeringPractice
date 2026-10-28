@@ -183,6 +183,8 @@ PYTHONPATH=src python -m pytest -q      # 90 passed
   far end is in-process.
 * Tax rates are carried on `ProductSpecification` but no tax is computed on the
   receipt. The assignment's use cases do not require it.
-* The Tk window could not be captured as a screenshot in the build
-  environment (no Screen Recording permission), so `docs/make_figures.py`
-  documents behaviour using transcripts of the real text-mode application.
+* Screenshots of the graphical window are produced by
+  `docs/capture_screenshots.py`, which drives the real window through scripted
+  scenarios and captures each frame; they are the report's figures. The
+  text-mode transcripts from `docs/make_figures.py` are kept as the evidence
+  that the same use cases run with no display.

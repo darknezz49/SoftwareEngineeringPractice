@@ -19,6 +19,8 @@ import sys
 import time
 from pathlib import Path
 
+from PIL import Image
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -30,13 +32,26 @@ from pos.presentation.gui import POSWindow  # noqa: E402
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs" / "screenshots"
 
 
+def settle(root: tk.Tk, rounds: int = 6, pause: float = 0.25) -> None:
+    """Pump the Tk event loop until the window has actually been painted."""
+    for _ in range(rounds):
+        root.update_idletasks()
+        root.update()
+        time.sleep(pause)
+
+
 def capture(root: tk.Tk, name: str) -> str:
     """Screenshot the region occupied by ``root`` into ``OUT/<name>.png``."""
-    root.update_idletasks()
-    root.update()
-    time.sleep(0.45)
+    settle(root)
+    # Re-read the frame every time: the window manager may have moved or
+    # resized the window since the previous shot.
     x, y = root.winfo_rootx(), root.winfo_rooty()
     w, h = root.winfo_width(), root.winfo_height()
+    if w < 100 or h < 100:                      # not mapped yet
+        root.deiconify()
+        settle(root)
+        x, y = root.winfo_rootx(), root.winfo_rooty()
+        w, h = root.winfo_width(), root.winfo_height()
     path = OUT / f"{name}.png"
     result = subprocess.run(
         ["screencapture", "-x", "-o", "-R", f"{x},{y},{w},{h}", str(path)],
@@ -44,7 +59,33 @@ def capture(root: tk.Tk, name: str) -> str:
     )
     if result.returncode != 0:
         print(f"  !! screencapture failed for {name}: {result.stderr.strip()}")
+        return str(path)
+
+    normalise(path)
     return str(path)
+
+
+# Retina screencaptures come out around 2360 px wide and are stamped at
+# 144 dpi, which claims a natural width of 16 inches.  A word processor then
+# has to shrink the image by two and a half times to fit a text column, and
+# LibreOffice mis-lays-out such a large scaling factor.  The image is
+# therefore resized to a sensible pixel size and re-stamped at 96 dpi so its
+# natural size is close to the frame the report gives it.
+TARGET_WIDTH = 1800
+TARGET_DPI = (96, 96)
+
+
+def normalise(path: Path) -> None:
+    """Resize a screenshot and reset its dpi so it scales predictably."""
+    with Image.open(path) as im:
+        im = im.convert("RGB")
+        if im.width > TARGET_WIDTH:
+            height = round(im.height * TARGET_WIDTH / im.width)
+            im = im.resize((TARGET_WIDTH, height), Image.LANCZOS)
+        im.save(path, "PNG", optimize=True, dpi=TARGET_DPI)
+    with Image.open(path) as im:
+        print(f"     {path.name}: {im.width}x{im.height} px "
+              f"@ {im.info.get('dpi')}")
 
 
 def main() -> int:
@@ -77,15 +118,13 @@ def main() -> int:
     window._refresh_sale()
     window._refresh_stock()
     window._show_receipt("Sales Receipt", result.receipt_text)
-    root.update_idletasks()
-    root.update()
-    time.sleep(0.7)
+    settle(root)
     shots.append(("02-sales-receipt", capture(root, "02-sales-receipt")))
     # close the receipt dialog (it is a Toplevel, so it is the last child)
     for child in root.winfo_children():
         if isinstance(child, tk.Toplevel):
             child.destroy()
-    root.update()
+    settle(root)
 
     # ---- 3. Store status after the sale -----------------------------------
     window.select_tab(2)
@@ -114,14 +153,12 @@ def main() -> int:
     window._refresh_stock()
     window._refresh_recent_sales()
     window._show_receipt("Refund Receipt", refund.receipt_text)
-    root.update_idletasks()
-    root.update()
-    time.sleep(0.7)
+    settle(root)
     shots.append(("05-refund-receipt", capture(root, "05-refund-receipt")))
     for child in root.winfo_children():
         if isinstance(child, tk.Toplevel):
             child.destroy()
-    root.update()
+    settle(root)
 
     # ---- 6. Store status after the return ---------------------------------
     window.select_tab(2)
