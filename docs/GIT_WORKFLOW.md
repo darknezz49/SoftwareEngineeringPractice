@@ -67,6 +67,7 @@ Produced by `git log --date=short --pretty="%ad  %h  %s"`:
 
 <!-- GITLOG-START -->
 ```
+2026-10-28  c1f0781  darknezz49  docs: refresh the Git evidence and add a submission-time refresh script
 2026-10-27  95228e6  darknezz49  docs(agile): sprint working notes and requirement traceability
 2026-10-27  c36b49d  darknezz49  docs: record the generated Git command history in GIT_WORKFLOW.md
 2026-10-26  7680c3b  darknezz49  docs: architecture notes, user manual and git workflow
@@ -97,6 +98,11 @@ Produced by `git log --stat --oneline` for the file-level detail:
 
 <!-- GITSTAT-START -->
 ```
+c1f0781 docs: refresh the Git evidence and add a submission-time refresh script
+ docs/GIT_EVIDENCE.md         | 145 +++++++++++++++++++++++++++++++++++++++++++
+ docs/GIT_WORKFLOW.md         |   8 +++
+ docs/refresh_git_evidence.sh |  65 +++++++++++++++++++
+ 3 files changed, 218 insertions(+)
 95228e6 docs(agile): sprint working notes and requirement traceability
  docs/agile/README.md | 100 +++++++++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 100 insertions(+)
